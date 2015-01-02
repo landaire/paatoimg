@@ -37,6 +37,10 @@ func main() {
 			Name:  "outfile, of",
 			Usage: "Output output file to write stitched PNG file",
 		},
+		cli.BoolFlag{
+			Name:  "no-overwrite, no",
+			Usage: "Overwrite existing PNG files (defaults to true)",
+		},
 	}
 
 	app.Action = Stitch
@@ -77,10 +81,12 @@ func Stitch(c *cli.Context) {
 		paaFileName := filepath.Base(file)
 		pngFileName := paaFileName[:len(paaFileName)-len(filepath.Ext(paaFileName))] + ".png"
 
-		output, err := ConvertPaaToPng(file, filepath.Join(c.String("outdir"), pngFileName))
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error occurred converting PAA to PNG: %s\n%s\n", output, err)
-			os.Exit(1)
+		if exists, _ := osutil.Exists(paaFileName); (c.Bool("no-overwrite") && !exists) || (!c.Bool("no-overwrite") && exists) {
+			output, err := ConvertPaaToPng(file, filepath.Join(c.String("outdir"), pngFileName))
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error occurred converting PAA to PNG: %s\n%s\n", output, err)
+				os.Exit(1)
+			}
 		}
 
 		pngs = append(pngs, pngFileName)
