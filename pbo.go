@@ -36,7 +36,7 @@ func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 		return nil, err
 	}
 
-	pboFiles := []string{}
+	pboFiles := []string{rootpbo}
 	for _, file := range files {
 		if layersPattern.Match([]byte(file.Name())) {
 			pboFiles = append(pboFiles, filepath.Join(pbodir, file.Name()))
