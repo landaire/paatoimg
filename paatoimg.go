@@ -41,6 +41,11 @@ func main() {
 			Name:  "no",
 			Usage: "Disable overwriting existing PNG files (defaults to false)",
 		},
+		cli.IntFlag{
+			Name:  "size, s",
+			Usage: "Size of the output image squares",
+			Value: 128,
+		},
 	}
 
 	app.Action = Stitch
@@ -83,7 +88,7 @@ func Stitch(c *cli.Context) {
 		pngFileName = filepath.Join(c.String("outdir"), pngFileName)
 
 		if exists, _ := osutil.Exists(pngFileName); (c.Bool("no") && !exists) || (!c.Bool("no") && exists) {
-			output, err := ConvertPaaToPng(file, pngFileName)
+			output, err := ConvertPaaToPng(file, pngFileName, c.Int("size"))
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error occurred converting PAA to PNG: %s\n%s\n", output, err)
 				os.Exit(1)
@@ -93,7 +98,7 @@ func Stitch(c *cli.Context) {
 		pngs = append(pngs, pngFileName)
 	}
 
-	stitchedImage, err := StitchImages(pngs, image.Point{512, 512})
+	stitchedImage, err := StitchImages(pngs, image.Point{c.Int("size"), c.Int("size")})
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error occurred creating stitched image:", err)
@@ -107,6 +112,7 @@ func Stitch(c *cli.Context) {
 	}
 	defer outFile.Close()
 
+	fmt.Println("Flushing image to disk...")
 	err = png.Encode(outFile, stitchedImage)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error occurred while writing PNG:", err)

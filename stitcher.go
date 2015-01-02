@@ -17,17 +17,29 @@ import (
 
 // The file naming pattern is S_X_Y_<rest of the crap we don't care about>.png
 var (
-	satellitePngNamePattern = regexp.MustCompile(`.*S_(?P<y>\d{3})_(?P<x>\d{3})_lco\.png`)
+	satellitePngNamePattern = regexp.MustCompile(`.*S_(?P<x>\d{3})_(?P<y>\d{3})_lco\.png`)
+	// This is for 512x512 images. Divide by 512/size
+	imageOverlap = 30
+	maxSize      = 512
 )
 
 // Stitches input images together. Missing images are assumed to be transparent
 func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *image.RGBA, err error) {
 	sort.Strings(paths)
 
-	maxRowAndCols := pointFromFileName(path.Base(paths[len(paths)-1]))
+	var maxX, maxY int
+	for _, imagePath := range paths {
+		point := pointFromFileName(path.Base(imagePath))
+		if point.X > maxX {
+			maxX = point.X
+		}
+		if point.Y > maxY {
+			maxY = point.Y
+		}
+	}
 
-	width := (maxRowAndCols.X + 1) * subImageSize.X
-	height := (maxRowAndCols.Y + 1) * subImageSize.Y
+	width := maxX * subImageSize.X
+	height := maxY * subImageSize.Y
 
 	fmt.Println(maxRowAndCols)
 	fmt.Println(paths)
@@ -37,14 +49,15 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 	// Create the in-memory RGBA image
 	rgbaImage := image.NewRGBA(image.Rect(0, 0, width, height))
 
-	for _, imagePath := range paths {
+	for i, imagePath := range paths {
+		fmt.Printf("Stitching %d/%d", i+1, len(paths))
 		if !satellitePngNamePattern.Match([]byte(imagePath)) {
 			return nil, fmt.Errorf("Invalid filename: %s", imagePath)
 		}
 
 		point := pointFromFileName(path.Base(imagePath))
-		point.X *= subImageSize.X
-		point.Y *= subImageSize.Y
+		point.X *= subImageSize.X - imageOverlap/(maxSize/subImageSize.X)
+		point.Y *= subImageSize.Y - imageOverlap/(maxSize/subImageSize.Y)
 
 		var gridPart image.Image
 
