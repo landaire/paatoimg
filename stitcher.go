@@ -38,8 +38,8 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 		}
 	}
 
-	width := maxX * subImageSize.X
-	height := maxY * subImageSize.Y
+	width := (maxX + 1) * subImageSize.X
+	height := (maxY + 1) * subImageSize.Y
 
 	fmt.Println("Image size should be", width, height)
 
