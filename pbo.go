@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	satellitePaaNamePattern = regexp.MustCompile(`.*S_(?P<x>\d{3})_(?P<y>\d{3})_lco\.paa`)
+	satellitePaaNamePattern = regexp.MustCompile(`.*S_(?P<y>\d{3})_(?P<x>\d{3})_lco\.paa`)
 )
 
 func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
@@ -89,8 +89,8 @@ func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 }
 
 func ConvertPaaToPng(source, dest string) (errOutput string, err error) {
+	fmt.Println("Converting", filepath.Base(source))
 	command := exec.Command(pal2pace, "-size=512", source, dest)
-	fmt.Println(command.Args)
 	err = command.Run()
 	output, _ := command.CombinedOutput()
 	errOutput = string(output)

@@ -16,27 +16,27 @@ import (
 
 // The file naming pattern is S_X_Y_<rest of the crap we don't care about>.png
 var (
-	satellitePngNamePattern  = regexp.MustCompile(`.*S_(?P<x>\d{3})_(?P<y>\d{3})_lco\.png`)
+	satellitePngNamePattern  = regexp.MustCompile(`.*S_(?P<y>\d{3})_(?P<x>\d{3})_lco\.png`)
 	ErrPathsNotSquare        = errors.New("Number of image paths is not a perfect square")
 	ErrInvalidGridSquareSize = errors.New("Invalid grid subimage size")
 )
 
-// Stitches input images together. The number of paths must be a perfect square
-// (e.g. 4, 9, 16, 25, 64) since the resulting image is expected to be a grid
+// Stitches input images together. Missing images are assumed to be transparent
 func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *image.RGBA, err error) {
-	// Check that the number of paths is a perfect square
-	if !isPerfectSquare(float64(len(paths))) {
-		return nil, ErrPathsNotSquare
-	}
+	sort.Strings(paths)
 
-	width := int(math.Floor(math.Sqrt(float64(len(paths))))) * subImageSize.X
-	height := width
+	maxRowAndCols := pointFromFileName(path.Base(paths[len(paths)-1]))
+
+	width := (maxRowAndCols.X + 1) * subImageSize.X
+	height := (maxRowAndCols.Y + 1) * subImageSize.Y
+
+	fmt.Println(maxRowAndCols)
+	fmt.Println(paths)
+
+	fmt.Println("Image size should be", width, height)
 
 	// Create the in-memory RGBA image
 	rgbaImage := image.NewRGBA(image.Rect(0, 0, width, height))
-
-	// Sort the paths
-	sort.Strings(paths)
 
 	for _, imagePath := range paths {
 		if !satellitePngNamePattern.Match([]byte(imagePath)) {
@@ -47,13 +47,15 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 		point.X *= subImageSize.X
 		point.Y *= subImageSize.Y
 
+		var gridPart image.Image
+
 		// Load the PNG image
 		file, err := os.Open(imagePath)
 		if err != nil {
 			return nil, err
 		}
 
-		gridPart, err := png.Decode(file)
+		gridPart, err = png.Decode(file)
 		if err != nil {
 			return nil, err
 		}
