@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"image"
 	"image/draw"
@@ -12,13 +11,13 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+
+	"github.com/nfnt/resize"
 )
 
 // The file naming pattern is S_X_Y_<rest of the crap we don't care about>.png
 var (
-	satellitePngNamePattern  = regexp.MustCompile(`.*S_(?P<y>\d{3})_(?P<x>\d{3})_lco\.png`)
-	ErrPathsNotSquare        = errors.New("Number of image paths is not a perfect square")
-	ErrInvalidGridSquareSize = errors.New("Invalid grid subimage size")
+	satellitePngNamePattern = regexp.MustCompile(`.*S_(?P<y>\d{3})_(?P<x>\d{3})_lco\.png`)
 )
 
 // Stitches input images together. Missing images are assumed to be transparent
@@ -60,15 +59,16 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 			return nil, err
 		}
 
-		if gridPart.Bounds().Size() != subImageSize {
-			return nil, ErrInvalidGridSquareSize
+		// Repeat this image
+		if gridPart.Bounds().Size().X < subImageSize.X {
+			// Note that even though the second argument is the bounds,
+			// the effective rectangle is smaller due to clipping.
+			gridPart = resize.Resize(uint(subImageSize.X), uint(subImageSize.Y), gridPart, resize.Lanczos3)
 		}
 
 		// This will turn out being something like 0,0, 512, 512 which is grid index 0,0 (top-left)
 		// or something like, 512,0, 1024, 512 which is grid index 1, 0
 		destRect := image.Rectangle{point, point.Add(subImageSize)}
-
-		//		fmt.Println("Drawing image starting at (%d, %d) to (%d, %d) from source")
 		draw.Draw(rgbaImage, destRect, gridPart, gridPart.Bounds().Min, draw.Src)
 
 		file.Close()
