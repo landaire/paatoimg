@@ -1,58 +1,108 @@
 package main
 
 import (
-	"encoding/binary"
 	"fmt"
+	"image"
+	"image/png"
 	"os"
 
-	"github.com/landaire/paa"
+	"path/filepath"
+
+	"github.com/codegangsta/cli"
+	"github.com/landaire/osutil"
 )
 
 const (
-	path = "/Users/lander/Documents/arma/a3/map_altis/data/layers/00_00/S_002_017_lco.paa"
+	version = "0.1.0"
 )
 
 func main() {
-	file, _ := os.Open(path)
-	defer file.Close()
+	app := cli.NewApp()
+	app.Name = "paatoimg"
+	app.Usage = "Extract satellite PAA files from PBO archives, and convert them to a giant stitched maps"
+	app.Author = "Lander Brandt"
+	app.Email = "@landaire"
+	app.Version = version
 
-	taggs, err := paa.ReadPaa(file)
-
-	if err != nil {
-		fmt.Println(err)
-		return
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "pbo",
+			Usage: "Base PBO file to read (others will be detected automatically)",
+		},
+		cli.StringFlag{
+			Name:  "outdir, od",
+			Usage: "Output directory to dump PNG files",
+		},
+		cli.StringFlag{
+			Name:  "outfile, of",
+			Usage: "Output output file to write stitched PNG file",
+		},
 	}
 
-	for _, tagg := range taggs {
-		fmt.Printf("%#v\n", tagg)
+	app.Action = Stitch
 
-		if tagg.Name() == paa.OFFS {
-			data := tagg.Data()
-			for i, offset := range data {
-				if data[i] == 0x0 {
-					break
-				}
+	err := app.Run(os.Args)
 
-				var length int64
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+	}
+}
 
-				if i == len(data)-1 || data[i+1] == 0x0 {
-					stat, _ := file.Stat()
-					length = stat.Size() - int64(offset)
-				} else {
-					length = int64(data[i+1] - data[i])
-				}
-
-				var width, height uint16
-
-				file.Seek(int64(offset), os.SEEK_SET)
-
-				binary.Read(file, binary.LittleEndian, &width)
-				binary.Read(file, binary.LittleEndian, &height)
-
-				fmt.Println("Width:", width)
-				fmt.Println("Height:", height)
-				fmt.Println("Length:", length)
-			}
+func Stitch(c *cli.Context) {
+	required := []string{"pbo", "outdir", "outfile"}
+	for _, flag := range required {
+		if !c.GlobalIsSet(flag) {
+			c.App.Command("help").Run(c)
+			return
 		}
+	}
+
+	paaFiles, err := DumpPaaFiles(c.String("pbo"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error occurred dumping PAA files: %s", err)
+		os.Exit(1)
+	}
+
+	// Create the output dir if it doesn't exist
+	if exist, _ := osutil.Exists(c.String("outdir")); !exist {
+		err := osutil.MkdirIntermediate("outdir")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error occurred creating output dir: %s", err)
+			os.Exit(1)
+		}
+	}
+
+	pngs := []string{}
+	for _, file := range paaFiles {
+		paaFileName := filepath.Base(file)
+		pngFileName := paaFileName[:len(paaFileName)-len(filepath.Ext(paaFileName))] + ".png"
+
+		err := ConvertPaaToPng(file, filepath.Join(c.String("outdir"), pngFileName))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error occurred converting PAA to PNG: %s", err)
+			os.Exit(1)
+		}
+
+		pngs = append(pngs, pngFileName)
+	}
+
+	stitchedImage, err := StitchImages(pngs, image.Point{512, 512})
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error occurred creating stitched image: %s", err)
+		os.Exit(1)
+	}
+
+	outFile, err := os.Create(c.String("outfile"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error occurred creating output file: %s", err)
+		os.Exit(1)
+	}
+	defer outFile.Close()
+
+	err = png.Encode(outFile, stitchedImage)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error occurred while writing PNG: %s", err)
+		os.Exit(1)
 	}
 }
