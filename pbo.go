@@ -74,6 +74,7 @@ func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 					return nil, err
 				}
 
+				entry.Seek(0, os.SEEK_SET)
 				// Copy the PAA data to the temp file
 				io.Copy(outFile, entry)
 
