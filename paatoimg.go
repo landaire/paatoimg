@@ -77,9 +77,9 @@ func Stitch(c *cli.Context) {
 		paaFileName := filepath.Base(file)
 		pngFileName := paaFileName[:len(paaFileName)-len(filepath.Ext(paaFileName))] + ".png"
 
-		err := ConvertPaaToPng(file, filepath.Join(c.String("outdir"), pngFileName))
+		output, err := ConvertPaaToPng(file, filepath.Join(c.String("outdir"), pngFileName))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error occurred converting PAA to PNG: %s", err)
+			fmt.Fprintf(os.Stderr, "Error occurred converting PAA to PNG: %s\n%s\n", output, err)
 			os.Exit(1)
 		}
 
