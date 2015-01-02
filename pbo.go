@@ -90,7 +90,8 @@ func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 func ConvertPaaToPng(source, dest string) (errOutput string, err error) {
 	command := exec.Command(pal2pace, "-size=512", source, dest)
 	err = command.Run()
-	errOutput = command.Stderr
+	output, _ := command.Output()
+	errOutput = string(output)
 
 	return
 }
