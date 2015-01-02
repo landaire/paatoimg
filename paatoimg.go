@@ -82,7 +82,7 @@ func Stitch(c *cli.Context) {
 		pngFileName := paaFileName[:len(paaFileName)-len(filepath.Ext(paaFileName))] + ".png"
 		pngFileName = filepath.Join(c.String("outdir"), pngFileName)
 
-		if exists, _ := osutil.Exists(paaFileName); (c.Bool("no") && !exists) || (!c.Bool("no") && exists) {
+		if exists, _ := osutil.Exists(pngFileName); (c.Bool("no") && !exists) || (!c.Bool("no") && exists) {
 			output, err := ConvertPaaToPng(file, pngFileName)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error occurred converting PAA to PNG: %s\n%s\n", output, err)
