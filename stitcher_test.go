@@ -31,7 +31,7 @@ func TestImageStitching(t *testing.T) {
 
 	paths := []string{}
 	for _, file := range files {
-		if satelliteNamePattern.Match([]byte(file.Name())) {
+		if satellitePngNamePattern.Match([]byte(file.Name())) {
 			abs, err := filepath.Abs(filepath.Join(pngdir, file.Name()))
 			if err != nil {
 				t.Fatal(err)
@@ -43,6 +43,13 @@ func TestImageStitching(t *testing.T) {
 	image, err := StitchImages(paths, image.Point{512, 512})
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	// Change this to true to update the out.png
+	if false {
+		outFile, _ := os.Create(filepath.Join(testImagesDir, "out.png"))
+		err = png.Encode(outFile, image)
+		outFile.Close()
 	}
 
 	// Open the good output file
