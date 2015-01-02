@@ -47,7 +47,7 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 	rgbaImage := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	for i, imagePath := range paths {
-		fmt.Printf("Stitching %d/%d", i+1, len(paths))
+		fmt.Printf("Stitching %d/%d\n", i+1, len(paths))
 		if !satellitePngNamePattern.Match([]byte(imagePath)) {
 			return nil, fmt.Errorf("Invalid filename: %s", imagePath)
 		}
