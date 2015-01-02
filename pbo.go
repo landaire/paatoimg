@@ -42,13 +42,13 @@ func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 	// Parse all of the PBO files
 	parsedPbos := make([]*pbo.Pbo, len(pboFiles))
 
-	for _, file := range pboFiles {
+	for i, file := range pboFiles {
 		pbo, err := pbo.NewPbo(file)
 		if err != nil {
 			return nil, err
 		}
 
-		parsedPbos = append(parsedPbos, pbo)
+		parsedPbos[i] = pbo
 	}
 
 	// Write out the satellite PAA files from each PBO to the tempdir
