@@ -41,9 +41,6 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 	width := maxX * subImageSize.X
 	height := maxY * subImageSize.Y
 
-	fmt.Println(maxRowAndCols)
-	fmt.Println(paths)
-
 	fmt.Println("Image size should be", width, height)
 
 	// Create the in-memory RGBA image
