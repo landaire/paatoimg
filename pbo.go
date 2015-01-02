@@ -90,8 +90,10 @@ func ConvertPaaToPng(source, dest string, size int) (errOutput string, err error
 	fmt.Println("Converting", filepath.Base(source))
 	command := exec.Command(pal2pace, fmt.Sprintf("-size=%d", size), source, dest)
 	err = command.Run()
-	output, _ := command.CombinedOutput()
-	errOutput = string(output)
+	if err != nil {
+		output, _ := command.CombinedOutput()
+		errOutput = string(output)
+	}
 
 	return
 }
