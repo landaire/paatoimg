@@ -65,7 +65,7 @@ func Stitch(c *cli.Context) {
 
 	// Create the output dir if it doesn't exist
 	if exist, _ := osutil.Exists(c.String("outdir")); !exist {
-		err := osutil.MkdirIntermediate("outdir")
+		err := osutil.MkdirIntermediate(c.String("outdir"))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error occurred creating output dir: %s", err)
 			os.Exit(1)

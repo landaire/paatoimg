@@ -16,7 +16,7 @@ import (
 
 // The file naming pattern is S_X_Y_<rest of the crap we don't care about>.png
 var (
-	satelliteNamePattern     = regexp.MustCompile(`.*S_(?P<x>\d{3})_(?P<y>\d{3})_lco\.png`)
+	satellitePngNamePattern  = regexp.MustCompile(`.*S_(?P<x>\d{3})_(?P<y>\d{3})_lco\.png`)
 	ErrPathsNotSquare        = errors.New("Number of image paths is not a perfect square")
 	ErrInvalidGridSquareSize = errors.New("Invalid grid subimage size")
 )
@@ -39,7 +39,7 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 	sort.Strings(paths)
 
 	for _, imagePath := range paths {
-		if !satelliteNamePattern.Match([]byte(imagePath)) {
+		if !satellitePngNamePattern.Match([]byte(imagePath)) {
 			return nil, fmt.Errorf("Invalid filename: %s", imagePath)
 		}
 
@@ -82,11 +82,11 @@ func isPerfectSquare(num float64) bool {
 }
 
 func pointFromFileName(name string) image.Point {
-	matches := satelliteNamePattern.FindStringSubmatch(name)
+	matches := satellitePngNamePattern.FindStringSubmatch(name)
 
 	p := image.Point{}
 
-	for i, name := range satelliteNamePattern.SubexpNames() {
+	for i, name := range satellitePngNamePattern.SubexpNames() {
 		// Ignore the whole regexp match and unnamed groups
 		if i == 0 || name == "" {
 			continue

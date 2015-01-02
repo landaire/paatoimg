@@ -17,6 +17,10 @@ const (
 	pal2pace = `C:\Program Files (x86)\Bohemia Interactive\Tools\TexView 2\Pal2PacE.exe`
 )
 
+var (
+	satellitePaaNamePattern = regexp.MustCompile(`.*S_(?P<x>\d{3})_(?P<y>\d{3})_lco\.paa`)
+)
+
 func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 	// Get all PBO files that will be loaded.
 	pbodir := filepath.Dir(rootpbo)
@@ -57,10 +61,12 @@ func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 		return nil, err
 	}
 
+	fmt.Println(tempdir)
+
 	paaFiles = []string{}
 	for _, pbo := range parsedPbos {
 		for _, entry := range pbo.Entries {
-			if satelliteNamePattern.Match([]byte(entry.Name)) {
+			if satellitePaaNamePattern.Match([]byte(entry.Name)) {
 				paaPath := filepath.Join(tempdir, entry.Name)
 				outFile, err := os.Create(paaPath)
 
