@@ -44,7 +44,7 @@ func main() {
 	err := app.Run(os.Args)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		fmt.Fprintln(os.Stderr, "Error:", err)
 	}
 }
 
@@ -59,7 +59,7 @@ func Stitch(c *cli.Context) {
 
 	paaFiles, err := DumpPaaFiles(c.String("pbo"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error occurred dumping PAA files: %s", err)
+		fmt.Fprintln(os.Stderr, "Error occurred dumping PAA files:", err)
 		os.Exit(1)
 	}
 
@@ -67,7 +67,7 @@ func Stitch(c *cli.Context) {
 	if exist, _ := osutil.Exists(c.String("outdir")); !exist {
 		err := os.MkdirAll(c.String("outdir"), os.ModePerm)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error occurred creating output dir: %s", err)
+			fmt.Fprintln(os.Stderr, "Error occurred creating output dir:", err)
 			os.Exit(1)
 		}
 	}
@@ -89,20 +89,20 @@ func Stitch(c *cli.Context) {
 	stitchedImage, err := StitchImages(pngs, image.Point{512, 512})
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error occurred creating stitched image: %s", err)
+		fmt.Fprintln(os.Stderr, "Error occurred creating stitched image:", err)
 		os.Exit(1)
 	}
 
 	outFile, err := os.Create(c.String("outfile"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error occurred creating output file: %s", err)
+		fmt.Fprintln(os.Stderr, "Error occurred creating output file:", err)
 		os.Exit(1)
 	}
 	defer outFile.Close()
 
 	err = png.Encode(outFile, stitchedImage)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error occurred while writing PNG: %s", err)
+		fmt.Fprintln(os.Stderr, "Error occurred while writing PNG:", err)
 		os.Exit(1)
 	}
 }
