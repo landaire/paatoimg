@@ -61,8 +61,6 @@ func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 		return nil, err
 	}
 
-	fmt.Println(tempdir)
-
 	paaFiles = []string{}
 	for _, pbo := range parsedPbos {
 		for _, entry := range pbo.Entries {
