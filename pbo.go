@@ -65,7 +65,7 @@ func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 	for _, pbo := range parsedPbos {
 		for _, entry := range pbo.Entries {
 			if satellitePaaNamePattern.Match([]byte(entry.Name)) {
-				paaPath := filepath.Join(tempdir, entry.Name)
+				paaPath := filepath.Join(tempdir, filepath.Base(entry.Name))
 				outFile, err := os.Create(paaPath)
 
 				if err != nil {
