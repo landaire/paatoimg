@@ -51,12 +51,12 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 		// Load the PNG image
 		file, err := os.Open(imagePath)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("While converting %s: %s", imagePath, err)
 		}
 
 		gridPart, err = png.Decode(file)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("While converting %s: %s", imagePath, err)
 		}
 
 		// Repeat this image
