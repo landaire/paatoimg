@@ -38,8 +38,10 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 		}
 	}
 
-	width := (maxX * subImageSize.X) - (maxX * imageOverlap)
-	height := (maxY * subImageSize.Y) - (maxY * imageOverlap)
+	segmentSize := imageOverlap / (maxSize / subImageSize.X)
+
+	width := (maxX * subImageSize.X) - (maxX * segmentSize)
+	height := (maxY * subImageSize.Y) - (maxY * segmentSize)
 
 	fmt.Println("Image size should be", width, height)
 
@@ -53,8 +55,8 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 		}
 
 		point := pointFromFileName(path.Base(imagePath))
-		point.X *= subImageSize.X - imageOverlap/(maxSize/subImageSize.X)
-		point.Y *= subImageSize.Y - imageOverlap/(maxSize/subImageSize.Y)
+		point.X *= subImageSize.X - segmentSize
+		point.Y *= subImageSize.Y - segmentSize
 
 		var gridPart image.Image
 
