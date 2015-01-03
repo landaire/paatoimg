@@ -31,15 +31,15 @@ func StitchImages(paths []string, subImageSize image.Point) (stitchedImage *imag
 	for _, imagePath := range paths {
 		point := pointFromFileName(path.Base(imagePath))
 		if point.X > maxX {
-			maxX = point.X
+			maxX = point.X + 1
 		}
 		if point.Y > maxY {
-			maxY = point.Y
+			maxY = point.Y + 1
 		}
 	}
 
-	width := (maxX + 1) * subImageSize.X
-	height := (maxY + 1) * subImageSize.Y
+	width := (maxX * subImageSize.X) - (maxX * imageOverlap)
+	height := (maxY * subImageSize.Y) - (maxY * imageOverlap)
 
 	fmt.Println("Image size should be", width, height)
 
