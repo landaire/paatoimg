@@ -1,3 +1,10 @@
+// Command paatoimg is used for extracting Arma 3 satellite PAA files from PBO files, converting the PAA files to PNG
+// at the specified resolution, then stitching all of the images together.
+//
+// Notes
+//
+// If a large size argument is supplied (> 256), you will more than likely end up using more than 5 GB of memory. My Windows
+// machine only has 8 GB and I get a memory exception when trying to render images with --size=512
 package main
 
 import (
@@ -57,6 +64,8 @@ func main() {
 	}
 }
 
+// Calls `DumpPaaFiles` on the input PBO file, calls `ConvertPaaToPng` if the image in --outdir does not exist and
+// --no was supplied, otherwise it always calls `ConvertPaaToPng`. Finally, `StitchImages` is called on PNG files
 func Stitch(c *cli.Context) {
 	required := []string{"pbo", "outdir", "outfile"}
 	for _, flag := range required {

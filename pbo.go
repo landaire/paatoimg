@@ -21,6 +21,8 @@ var (
 	satellitePaaNamePattern = regexp.MustCompile(`.*S_(?P<y>\d{3})_(?P<x>\d{3})_lco\.paa`)
 )
 
+// Uses the `rootpbo` to find related layer files and extracts all satellite PAA files from all of the related PBO
+// files found.
 func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 	// Get all PBO files that will be loaded.
 	pbodir := filepath.Dir(rootpbo)
@@ -86,6 +88,7 @@ func DumpPaaFiles(rootpbo string) (paaFiles []string, err error) {
 	return paaFiles, nil
 }
 
+// Converts `source` to a PNG located at `dest` by utilizing Bohemia's Pal2PacE.exe
 func ConvertPaaToPng(source, dest string, size int) (errOutput string, err error) {
 	fmt.Println("Converting", filepath.Base(source))
 	command := exec.Command(pal2pace, fmt.Sprintf("-size=%d", size), source, dest)

@@ -95,6 +95,7 @@ func isPerfectSquare(num float64) bool {
 	return sqrt*sqrt == num
 }
 
+// Converts a file name of form S_<X>_<Y>_lco.png to an `image.Point`
 func pointFromFileName(name string) image.Point {
 	matches := satellitePngNamePattern.FindStringSubmatch(name)
 
